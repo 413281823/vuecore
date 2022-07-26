@@ -27,5 +27,17 @@ const obj = new Proxy(data, {
         deps.add(activeEffect)
         // 返回属性值
         return target[key]
-    }
+    },
+    // 设置拦截操作
+     set(target, key, newVal){
+        // 设置属性值
+        target[key] = newVal
+        // 根据target 从🪣中取得depsMap, 它是key --》 effects
+        const depsMap = bucket.get(target)
+        if (!depsMap) return
+        // 根据key取得所有副作用函数effects
+        const effects = depsMap.get(key)
+        // 执行副作用函数
+        effects && effects.forEach(fn => fn())
+     }
 })
